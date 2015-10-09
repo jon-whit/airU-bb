@@ -1,6 +1,5 @@
 ![airU](https://raw.github.com/jon-whit/airU/master/airU.png)
-
-$airU
+airU
 =====
 
 Contribute

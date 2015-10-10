@@ -1,13 +1,13 @@
 ![airU](https://raw.github.com/jon-whit/airU/master/airU.png)
-airU
+airU-pi
 =====
 
 Contribute
 ----------
 Please see the contribution guidelines in [CONTRIBUTING.md](./CONTRIBUTING.md).
 
-- Issue Tracker: github.com/jon-whit/airU/issues
-- Source Code: github.com/jon-whit/airU
+- Issue Tracker: github.com/jon-whit/airU-pi/issues
+- Source Code: github.com/jon-whit/airU-pi
 
 Support
 -------

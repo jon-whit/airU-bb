@@ -76,7 +76,7 @@ class AirStation:
         Gets the current temperature as reported by the BMP085/BMP180 sensor.
 
         For more information on how this reading is obtained, please see the
-        official datasheet from Bosch.
+        official datasheet from Bosch:
 
         https://ae-bst.resource.bosch.com/media/products/dokumente/bmp180/BST-BMP180-DS000-12~1.pdf
 
@@ -93,7 +93,7 @@ class AirStation:
         Gets the current pressure as reported by the BMP085/BMP180 sensor.
 
         For more information on how this reading is obtained, please see the
-        official datasheet from Bosch.
+        official datasheet from Bosch:
 
         https://ae-bst.resource.bosch.com/media/products/dokumente/bmp180/BST-BMP180-DS000-12~1.pdf
 
@@ -111,7 +111,7 @@ class AirStation:
         Gets the current altitude as reported by the BMP085/BMP180 sensor.
 
         For more information on how this reading is obtained, please see the
-        official datasheet from Bosch.
+        official datasheet from Bosch:
 
         https://ae-bst.resource.bosch.com/media/products/dokumente/bmp180/BST-BMP180-DS000-12~1.pdf
 
@@ -128,7 +128,7 @@ class AirStation:
         Gets the current percentage of humidity as reported by the DHT11/DHT22 sensor.
 
         For more information on how this reading is obtained, please see the
-        official datasheet from AOSONG.
+        official datasheet from AOSONG:
 
         http://akizukidenshi.com/download/ds/aosong/AM2302.pdf
 
@@ -140,6 +140,106 @@ class AirStation:
         # todo: improve this definition so that it returns None if a result is not returned
         # within after some number of retries
         return Adafruit_DHT.read_retry(Adafruit_DHT.DHT22, DHT22_PIN, retries=retries)[0]
+
+    def get_pm(self, retries=5):
+        """
+        Gets the current particular matter reading as a concentration per unit volume as reported by
+        the Shinyei PPD42NJ sensor.
+
+        For more information on how this reading is obtained, please see the
+        official datasheet from Seeed Studio:
+
+        http://www.seeedstudio.com/wiki/images/4/4c/Grove_-_Dust_sensor.pdf
+
+        :param retries: The number of times to retry to get a reading (default 15)
+        :return: A float representing the concentration of particles per unit volume, or None if no reading was
+                 obtained in the retry period.
+        """
+
+        return None
+
+    def get_co2(self, retries=5):
+        """
+        Gets the current CO2 reading as a concentration in parts per million (ppm) as reported by the MG-811
+        sensor.
+
+        For more information on how this reading is obtained, please see the
+        official datasheet below:
+
+        http://sandboxelectronics.com/files/SEN-000007/MG811.pdf
+
+        :param retries: The number of times to retry to get a reading (default 5)
+        :return: A float representing the concentration of CO2 (ppm), or None if no reading was
+                 obtained within the retry period.
+        """
+
+        return None
+
+    def get_co(self, retries=5):
+        """
+        Gets the current CO reading as a concentration in parts per million (ppm) as reported by the (fill
+        this in here).
+
+        For more information on how this reading is obtained, please see the
+        official datasheet below:
+
+        todo: Get datasheet for the specific CO sensor we are using
+
+        :param retries: The number of times to retry to get a reading (default 5)
+        :return: A float representing the concentration of CO (ppm), or None if no reading was obtained
+                 within the retry period.
+        """
+
+        return None
+
+    def get_o3(self, retries=5):
+        """
+        Gets the current O3 reading as a concentration in parts per million (ppm) as reported by the (fill
+        this in here).
+
+        For more information on how this reading is obtained, please see the
+        official datasheet below:
+
+        todo: Get datasheet for the specific O3 sensor we are using
+
+        :param retries: The number of times to retry to get a reading (default 5)
+        :return: A float representing the concentration of O3 (ppm), or None if no reading was obtained
+                 within the retry period.
+        """
+
+        return None
+
+    def get_uv(self, retries=5):
+        """
+        Gets the current Ultra Violent Index (UVI) as reported by the Reyax UVI-01 sensor.
+
+        For more information on how this reading is obtained, please see the
+        official datasheet below:
+
+        http://www.reyax.com/Module/UVI/UVI-01-E.pdf
+
+        :param retries: The number of times to retry to get a reading (default 5)
+        :return: A float representing the the current ultraviolet index rating, or None if no reading
+                 was obtained within the retry period.
+        """
+
+        return None
+
+    def get_lux(self, retries=5):
+        """
+        Gets the current light intensity in lux as reported by the LDR sensor.
+
+        For more information on how this reading is obtained, please see the
+        official datasheet below:
+
+        todo: Get datasheet for the specific LDR we are using
+
+        :param retries: The number of times to retry to get a reading (default 5)
+        :return: A float representing the current light intensity in lux, or None if no reading was
+                 obtained within the retry period.
+        """
+
+        return None
 
     def close(self):
         """

@@ -11,8 +11,8 @@ Contribute
 ----------
 Please see the contribution guidelines in [CONTRIBUTING.md](./CONTRIBUTING.md).
 
-- Issue Tracker: github.com/jon-whit/airU-pi/issues
-- Source Code: github.com/jon-whit/airU-pi
+- Issue Tracker: https://github.com/jon-whit/airU-pi/issues
+- Source Code: https://github.com/jon-whit/airU-pi
 
 Support
 -------

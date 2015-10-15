@@ -2,7 +2,9 @@ import time
 import Adafruit_BMP.BMP085 as BMP085
 import Adafruit_DHT
 import utils
+from exception import RetryException
 from exception import InitException
+from utils import retry
 
 # Define constants specific to an AirStation (pin numbers, etc..)
 DHT22_PIN = 4
@@ -71,7 +73,8 @@ class AirStation:
         gps_data = self._gpsp.get_gps_data()
         return gps_data['lon'], gps_data['lat']
 
-    def get_temp(self, retries=5):
+    @retry(RetryException, retries=5)
+    def get_temp(self):
         """
         Gets the current temperature as reported by the BMP085/BMP180 sensor.
 
@@ -80,15 +83,14 @@ class AirStation:
 
         https://ae-bst.resource.bosch.com/media/products/dokumente/bmp180/BST-BMP180-DS000-12~1.pdf
 
-        :param retries: The number of times to retry to get a reading (default 5)
-        :return: A float representing the current temperature, or None if no reading was obtained in the retry period.
+        :return: A float representing the current temperature.
+        :raises: exception.RetryException if no reading was obtained in the retry period.
         """
 
-        # todo: improve this definition so that it returns None if a result is not returned
-        # within after some number of retries
         return self._bmp.read_temperature()
 
-    def get_pressure(self, retries=5):
+    @retry(RetryException, retries=5)
+    def get_pressure(self):
         """
         Gets the current pressure as reported by the BMP085/BMP180 sensor.
 
@@ -97,16 +99,15 @@ class AirStation:
 
         https://ae-bst.resource.bosch.com/media/products/dokumente/bmp180/BST-BMP180-DS000-12~1.pdf
 
-        :param retries: The number of times to retry to get a reading (default 5)
-        :return: A float representing the current barometric pressure, or None if no reading was obtained in the retry
-                 period.
+        :return: A float representing the current barometric pressure.
+        :raises: exception.RetryException if no reading was obtained in the retry period.
+
         """
 
-        # todo: improve this definition so that it returns None if a result is not returned
-        # within after some number of retries
         return self._bmp.read_pressure()
 
-    def get_altitude(self, retries=5):
+    @retry(RetryException, retries=5)
+    def get_altitude(self):
         """
         Gets the current altitude as reported by the BMP085/BMP180 sensor.
 
@@ -115,15 +116,14 @@ class AirStation:
 
         https://ae-bst.resource.bosch.com/media/products/dokumente/bmp180/BST-BMP180-DS000-12~1.pdf
 
-        :param retries: The number of times to retry to get a reading (default 5)
-        :return: A float representing the current altitude, or None if no reading was obtained in the retry period.
+        :return: A float representing the current altitude.
+        :raises: exception.RetryException if no reading was obtained in the retry period.
         """
 
-        # todo: improve this definition so that it returns None if a result is not returned
-        # within after some number of retries
         return self._bmp.read_altitude()
 
-    def get_humidity(self, retries=15):
+    @retry(RetryException, retries=2)
+    def get_humidity(self):
         """
         Gets the current percentage of humidity as reported by the DHT11/DHT22 sensor.
 
@@ -132,16 +132,14 @@ class AirStation:
 
         http://akizukidenshi.com/download/ds/aosong/AM2302.pdf
 
-        :param retries: The number of times to retry to get a reading (default 15)
-        :return: A float representing the percentage of humidity, or None if no reading was obtained in the retry
-                 period.
+        :return: A float representing the percentage of humidity.
+        :raises: exception.RetryException if no reading was obtained in the retry period.
         """
 
-        # todo: improve this definition so that it returns None if a result is not returned
-        # within after some number of retries
-        return Adafruit_DHT.read_retry(Adafruit_DHT.DHT22, DHT22_PIN, retries=retries)[0]
+        return Adafruit_DHT.read_retry(Adafruit_DHT.DHT22, DHT22_PIN)[0]
 
-    def get_pm(self, retries=5):
+    @retry(RetryException, retries=5)
+    def get_pm(self):
         """
         Gets the current particular matter reading as a concentration per unit volume as reported by
         the Shinyei PPD42NJ sensor.
@@ -151,14 +149,14 @@ class AirStation:
 
         http://www.seeedstudio.com/wiki/images/4/4c/Grove_-_Dust_sensor.pdf
 
-        :param retries: The number of times to retry to get a reading (default 15)
-        :return: A float representing the concentration of particles per unit volume, or None if no reading was
-                 obtained in the retry period.
+        :return: A float representing the concentration of particles per unit volume.
+        :raises: exception.RetryException if no reading was obtained in the retry period.
         """
 
         return None
 
-    def get_co2(self, retries=5):
+    @retry(RetryException, retries=5)
+    def get_co2(self):
         """
         Gets the current CO2 reading as a concentration in parts per million (ppm) as reported by the MG-811
         sensor.
@@ -169,13 +167,14 @@ class AirStation:
         http://sandboxelectronics.com/files/SEN-000007/MG811.pdf
 
         :param retries: The number of times to retry to get a reading (default 5)
-        :return: A float representing the concentration of CO2 (ppm), or None if no reading was
-                 obtained within the retry period.
+        :return: A float representing the concentration of CO2 (ppm).
+        :raises: exception.RetryException if no reading was obtained in the retry period.
         """
 
         return None
 
-    def get_co(self, retries=5):
+    @retry(RetryException, retries=5)
+    def get_co(self):
         """
         Gets the current CO reading as a concentration in parts per million (ppm) as reported by the (fill
         this in here).
@@ -185,14 +184,14 @@ class AirStation:
 
         todo: Get datasheet for the specific CO sensor we are using
 
-        :param retries: The number of times to retry to get a reading (default 5)
-        :return: A float representing the concentration of CO (ppm), or None if no reading was obtained
-                 within the retry period.
+        :return: A float representing the concentration of CO (ppm).
+        :raises: exception.RetryException if no reading was obtained in the retry period.
         """
 
         return None
 
-    def get_o3(self, retries=5):
+    @retry(RetryException, retries=5)
+    def get_o3(self):
         """
         Gets the current O3 reading as a concentration in parts per million (ppm) as reported by the (fill
         this in here).
@@ -202,14 +201,14 @@ class AirStation:
 
         todo: Get datasheet for the specific O3 sensor we are using
 
-        :param retries: The number of times to retry to get a reading (default 5)
-        :return: A float representing the concentration of O3 (ppm), or None if no reading was obtained
-                 within the retry period.
+        :return: A float representing the concentration of O3 (ppm).
+        :raises: exception.RetryException if no reading was obtained in the retry period.
         """
 
         return None
 
-    def get_uv(self, retries=5):
+    @retry(RetryException, retries=5)
+    def get_uv(self):
         """
         Gets the current Ultra Violent Index (UVI) as reported by the Reyax UVI-01 sensor.
 
@@ -218,14 +217,14 @@ class AirStation:
 
         http://www.reyax.com/Module/UVI/UVI-01-E.pdf
 
-        :param retries: The number of times to retry to get a reading (default 5)
-        :return: A float representing the the current ultraviolet index rating, or None if no reading
-                 was obtained within the retry period.
+        :return: A float representing the the current ultraviolet index rating.
+        :raises: exception.RetryException if no reading was obtained in the retry period.
         """
 
         return None
 
-    def get_lux(self, retries=5):
+    @retry(RetryException, retries=5)
+    def get_lux(self):
         """
         Gets the current light intensity in lux as reported by the LDR sensor.
 
@@ -234,9 +233,8 @@ class AirStation:
 
         todo: Get datasheet for the specific LDR we are using
 
-        :param retries: The number of times to retry to get a reading (default 5)
-        :return: A float representing the current light intensity in lux, or None if no reading was
-                 obtained within the retry period.
+        :return: A float representing the current light intensity in lux
+        :raises: exception.RetryException if no reading was obtained in the retry period.
         """
 
         return None

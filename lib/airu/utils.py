@@ -1,5 +1,10 @@
 import threading
+import spidev
 from gps import *
+from functools import wraps
+
+spi = spidev.SpiDev()
+spi.open(0, 0)
 
 class GpsPoller(threading.Thread):
 
@@ -33,6 +38,58 @@ class GpsPoller(threading.Thread):
         """
         while self.running:
             self.current_value = self.session.next()
+
+def readadc(channel):
+    """
+    Reads SPI data from the MCP3008 chip, converting an analog signal to a digital one, and
+    return the given reading from the supplied channel.
+
+    :param channel: The MCP3008 channel in which the analog sensor is connected.
+    :return: A float corresponding to the analog value read out by the sensor.
+    """
+    if (channel > 7 or channel < 0):
+        return -1
+    r = spi.xfer2([1, (8 + channel) << 4, 0])
+    adcout = ((r[1] & 3) << 8) + r[2]
+    return adcout
+
+def retry(e, retries=4, delay=1, logger=None):
+    """
+    A decorator that will retry whatever function that it decorates a specified
+    number of times with a delay period between each try. If the decorated
+    function does not return a result that is *not* None, then this decorator
+    will raise the supplied exception.
+
+    :param e: The exception to raise if the retry count is exceeded.
+    :param retries: The of retries that should be carried out.
+    :param delay: The time delay between retries (seconds).
+    :param logger: An optional logger to use.
+    """
+
+    def deco_retry(f):
+
+        @wraps(f)
+        def f_retry(*args, **kwargs):
+            mtries = retries
+            while mtries > 0:
+                result = f(*args, **kwargs)
+
+                if result is None:
+                    time.sleep(delay)
+                    mtries -= 1
+
+                    if logger:
+                        msg = "Call to '{0}' failed to acquire a value... Retrying in {1} seconds.".format(f.__name__,
+                                                                                                           delay)
+                        logger.warning(msg)
+                else:
+                    return result
+
+            raise e("Call to '{0}' failed to acquire a value in the retry period.".format(f.__name__))
+
+        return f_retry
+
+    return deco_retry
 
 
 def get_mac(interface):

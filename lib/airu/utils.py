@@ -1,10 +1,6 @@
 import threading
-import spidev
 from gps import *
 from functools import wraps
-
-spi = spidev.SpiDev()
-spi.open(0, 0)
 
 class GpsPoller(threading.Thread):
 
@@ -38,20 +34,6 @@ class GpsPoller(threading.Thread):
         """
         while self.running:
             self.current_value = self.session.next()
-
-def readadc(channel):
-    """
-    Reads SPI data from the MCP3008 chip, converting an analog signal to a digital one, and
-    return the given reading from the supplied channel.
-
-    :param channel: The MCP3008 channel in which the analog sensor is connected.
-    :return: A float corresponding to the analog value read out by the sensor.
-    """
-    if (channel > 7 or channel < 0):
-        return -1
-    r = spi.xfer2([1, (8 + channel) << 4, 0])
-    adcout = ((r[1] & 3) << 8) + r[2]
-    return adcout
 
 def retry(e, retries=4, delay=1, logger=None):
     """

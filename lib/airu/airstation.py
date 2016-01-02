@@ -2,12 +2,13 @@ import time
 import Adafruit_BMP.BMP085 as BMP085
 import Adafruit_DHT
 import utils
+import gps
 from exception import RetryException
 from exception import InitException
 from utils import retry
 
 # Define constants specific to an AirStation (pin numbers, etc..)
-DHT22_PIN = 4
+DHT22_PIN = 'P8_11'
 
 class AirStation:
     """
@@ -40,14 +41,16 @@ class AirStation:
         """
         self._id = utils.get_mac('eth0')
         self._bmp = BMP085.BMP085()
-        self._gpsp = utils.GpsPoller()
-        self._gpsp.start()  # start polling the GPS sensor
+        #self._gpsp = utils.GpsPoller()
+        #self._gpsp.start()  # start polling the GPS sensor
+        self._gps = gps.gps("localhost", "2947")
+        self._gps.stream(gps.WATCH_ENABLE | gps.WATCH_NEWSTYLE)
 
         # Wait a few seconds to ensure a GPS fix
-        time.sleep(5)
+        #time.sleep(5)
         location = self.get_location()
-        self._lat = location[0]
-        self._lon = location[1]
+        self._lon = location[0]
+        self._lat = location[1]
 
         return True
 
@@ -63,6 +66,7 @@ class AirStation:
 
         return self._id
 
+    @retry(RetryException, retries=5)
     def get_location(self):
         """
         Gets the latitudinal and longitudinal coordinates of this AirStation as a tuple.
@@ -70,8 +74,13 @@ class AirStation:
         :return: A tuple containing the latitude and longitude, respectively.
         """
 
-        gps_data = self._gpsp.get_gps_data()
-        return gps_data['lon'], gps_data['lat']
+        #gps_data = self._gpsp.get_gps_data()
+        gps_data = self._gps.next()
+        
+        if 'lon' not in gps_data or 'lat' not in gps_data:
+            return None
+        else:
+            return gps_data['lon'], gps_data['lat']
 
     @retry(RetryException, retries=5)
     def get_temp(self):
@@ -248,8 +257,8 @@ class AirStation:
         """
 
         # Stop the GpsPoller in the extra thread
-        self._gpsp.running = False
-        self._gpsp.join()
+        #self._gpsp.running = False
+        #self._gpsp.join()
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         """

@@ -2,12 +2,14 @@ import time
 import Adafruit_BMP.BMP085 as BMP085
 import Adafruit_DHT
 import utils
+import gps
+import serial
 from exception import RetryException
 from exception import InitException
 from utils import retry
 
 # Define constants specific to an AirStation (pin numbers, etc..)
-DHT22_PIN = 4
+DHT22_PIN = 'P8_11'
 
 class AirStation:
     """
@@ -40,15 +42,22 @@ class AirStation:
         """
         self._id = utils.get_mac('eth0')
         self._bmp = BMP085.BMP085()
-        self._gpsp = utils.GpsPoller()
-        self._gpsp.start()  # start polling the GPS sensor
+        #self._gpsp = utils.GpsPoller()
+        #self._gpsp.start()  # start polling the GPS sensor
+        self._gps = gps.gps("localhost", "2947")
+        self._gps.stream(gps.WATCH_ENABLE | gps.WATCH_NEWSTYLE)
 
         # Wait a few seconds to ensure a GPS fix
-        time.sleep(5)
+        #time.sleep(5)
         location = self.get_location()
-        self._lat = location[0]
-        self._lon = location[1]
-
+        self._lon = location[0]
+        self._lat = location[1]
+ 
+        # Open a connection with the PMS3003 sensor
+        self._pm = serial.Serial(port="/dev/ttyO2", baudrate=9600, rtscts=True, dsrdtr=True)
+        self._pm.close()
+        self._pm.open()
+        
         return True
 
     def get_id(self):
@@ -63,6 +72,7 @@ class AirStation:
 
         return self._id
 
+    @retry(RetryException, retries=5)
     def get_location(self):
         """
         Gets the latitudinal and longitudinal coordinates of this AirStation as a tuple.
@@ -70,8 +80,13 @@ class AirStation:
         :return: A tuple containing the latitude and longitude, respectively.
         """
 
-        gps_data = self._gpsp.get_gps_data()
-        return gps_data['lon'], gps_data['lat']
+        #gps_data = self._gpsp.get_gps_data()
+        gps_data = self._gps.next()
+        
+        if 'lon' not in gps_data or 'lat' not in gps_data:
+            return None
+        else:
+            return gps_data['lon'], gps_data['lat']
 
     @retry(RetryException, retries=5)
     def get_temp(self):
@@ -153,7 +168,49 @@ class AirStation:
         :raises: exception.RetryException if no reading was obtained in the retry period.
         """
 
-        return None
+        # Flush the existing input buffer to ensure a fresh reading
+        self._pm.flushInput()
+        res = self._pm.read(24)
+        
+        # Add up each of the bytes in the frame
+        sum = 0
+        for i in range(0, 22):
+            sum = sum + int(res[i].encode("hex"), 16)
+        
+        # Calculate the checksum using the last two bytes of the frame
+        chksum = 256*int(res[22].encode("hex"), 16) + int(res[23].encode("hex"), 16)
+
+        if sum != chksum:
+            return None
+
+        # Get the PM readings using the TSI standard
+        pm1_upperb = int(res[4].encode("hex"), 16)
+        pm1_lowerb = int(res[5].encode("hex"), 16)
+        pm1 = 256*pm1_upperb + pm1_lowerb
+
+        pm25_upperb = int(res[6].encode("hex"), 16)
+        pm25_lowerb = int(res[7].encode("hex"), 16)
+        pm25 = 256*pm25_upperb + pm25_lowerb
+
+        pm10_upperb = int(res[8].encode("hex"), 16)
+        pm10_lowerb = int(res[9].encode("hex"), 16) 
+        pm10 = 256*pm10_upperb + pm10_lowerb 
+
+        # Get the PM readings using the atmosphere as the standard
+        pm1at_upperb = int(res[10].encode("hex"), 16)
+        pm1at_lowerb = int(res[11].encode("hex"), 16)
+        pm1at = 256*pm1at_upperb + pm1at_lowerb
+
+        pm25at_upperb = int(res[12].encode("hex"), 16)
+        pm25at_lowerb = int(res[13].encode("hex"), 16)
+        pm25at = 256*pm25at_upperb + pm25at_lowerb
+
+        pm10at_upperb = int(res[14].encode("hex"), 16)
+        pm10at_lowerb = int(res[15].encode("hex"), 16)
+        pm10at = 256*pm10at_upperb + pm10at_lowerb
+        
+        # Return the TSI standard readings
+        return (pm1, pm25, pm10)
 
     @retry(RetryException, retries=5)
     def get_co2(self):
@@ -248,8 +305,8 @@ class AirStation:
         """
 
         # Stop the GpsPoller in the extra thread
-        self._gpsp.running = False
-        self._gpsp.join()
+        #self._gpsp.running = False
+        #self._gpsp.join()
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         """

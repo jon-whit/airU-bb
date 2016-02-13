@@ -1,5 +1,5 @@
 ![airU](https://raw.github.com/jon-whit/airU/master/airU.png)
-airU-pi
+airU-bb
 =====
 The airU project is an interdisciplinary project by University of Utah Computer Science, Chemical Engineering, and Computer Engineering students who have designed a low cost air-quality sensor platform that is suited to improving our understanding of the Wasatch Front’s air quality challenges.  The project hopes to provide:
 
@@ -11,8 +11,8 @@ Contribute
 ----------
 Please see the contribution guidelines in [CONTRIBUTING.md](./CONTRIBUTING.md).
 
-- Issue Tracker: https://github.com/jon-whit/airU-pi/issues
-- Source Code: https://github.com/jon-whit/airU-pi
+- Issue Tracker: https://github.com/jon-whit/airU-bb/issues
+- Source Code: https://github.com/jon-whit/airU-bb
 
 Support
 -------

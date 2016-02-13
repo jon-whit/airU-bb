@@ -168,3 +168,4 @@ crashlytics-build.properties
 
 # Eagle swap files
 *.s#[0-9]*
+*.b#[0-9]*

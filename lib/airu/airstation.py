@@ -44,17 +44,17 @@ class AirStation:
         self._bmp = BMP085.BMP085()
         #self._gpsp = utils.GpsPoller()
         #self._gpsp.start()  # start polling the GPS sensor
-        self._gps = gps.gps("localhost", "2947")
-        self._gps.stream(gps.WATCH_ENABLE | gps.WATCH_NEWSTYLE)
+        #self._gps = gps.gps("localhost", "2947")
+        #self._gps.stream(gps.WATCH_ENABLE | gps.WATCH_NEWSTYLE)
 
         # Wait a few seconds to ensure a GPS fix
         #time.sleep(5)
-        location = self.get_location()
-        self._lon = location[0]
-        self._lat = location[1]
+        #location = self.get_location()
+        #self._lon = location[0]
+        #self._lat = location[1]
  
         # Open a connection with the PMS3003 sensor
-        self._pm = serial.Serial(port="/dev/ttyO2", baudrate=9600, rtscts=True, dsrdtr=True)
+        self._pm = serial.Serial(port="/dev/ttyO1", baudrate=9600, rtscts=True, dsrdtr=True)
         self._pm.close()
         self._pm.open()
         

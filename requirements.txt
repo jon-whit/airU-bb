@@ -2,5 +2,6 @@
 -e git://github.com/adafruit/Adafruit_Python_GPIO.git#egg=Adafruit_GPIO
 -e git://github.com/adafruit/Adafruit_Python_BMP.git#egg=Adafruit_BMP
 -e git://github.com/adafruit/Adafruit_Python_DHT.git#egg=Adafruit_DHT
+xlsxwriter
 peewee
 pyserial

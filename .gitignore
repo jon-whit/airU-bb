@@ -1,3 +1,7 @@
+
+### Test Database ###
+*.db
+
 ### SublimeText ###
 # cache files for sublime text
 *.tmlanguage.cache

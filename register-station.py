@@ -9,8 +9,9 @@ if __name__ == '__main__':
 
   url     = 'http://dev.air.eng.utah.edu/api/stations/ping'
   headers = {'Content-Type': 'application/json'}
-  message = {"DeviceID": get_mac('eth0')}
+  message = {"id": get_mac('eth0')}
 
+  print message
   r = requests.post(url, data=json.dumps(message), headers=headers)
   if r.status_code == 200:
     print 'Device Registered.'

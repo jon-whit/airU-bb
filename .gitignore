@@ -2,6 +2,9 @@
 ### Test Database ###
 *.db
 
+### Excel Files ###
+*.xlsx
+
 ### SublimeText ###
 # cache files for sublime text
 *.tmlanguage.cache

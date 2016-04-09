@@ -11,12 +11,20 @@ def prepare_db():
   db.init('/root/air-metrics.db')
   db.connect()
 
-def fetch_data():
+def fetch_data(excludeNonPollutants):
   """
   Queries local database for all metrics which have not been uploaded to AirU server.
 
   :return: An array of all data metrics which have not been uploaded.
   """
+  if excludeNonPollutants:
+    return AirMeasurement().select().where(~AirMeasurement.uploaded,
+                                          AirMeasurement.type != 'Temperature',
+                                          AirMeasurement.type != 'Altitude',
+                                          AirMeasurement.type != 'Pressure',
+                                          AirMeasurement.type != 'Humidity',
+                                          AirMeasurement.type != 'PM1.0')
+
   return AirMeasurement().select().where(~(AirMeasurement.uploaded))
 
 def encode_data(metrics):
@@ -70,12 +78,20 @@ def upload(message, metrics):
       m.uploaded = True
       m.save()
 
+  return r.status_code
+
 if __name__ == '__main__':
   """
   Entry point for uploaded Beaglebone data to server API.
   """
   prepare_db()
-  metrics = fetch_data()
-  if len(metrics) > 0:
-    # only upload if there is something to upload
-    upload(encode_data(metrics), metrics)
+
+  # server api has an unresolved bug which causes uploads to fail if the 
+  # uploaded datapoint is a type without a computable AQI
+  # sending non pollutants first, is a workaround until the bug is resolved
+  pollutants = fetch_data(True)
+  if len(pollutants) > 0:
+    status_code = upload(encode_data(pollutants), pollutants)
+    if status_code == 200:
+      non_pollutants = fetch_data(False)
+      upload(encode_data(non_pollutants), non_pollutants)

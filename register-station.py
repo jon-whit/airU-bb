@@ -9,7 +9,7 @@ if __name__ == '__main__':
 
   url     = 'http://dev.air.eng.utah.edu/api/stations/ping'
   headers = {'Content-Type': 'application/json'}
-  message = {"id": get_mac('eth0')}
+  message = {"id": get_mac('eth0').replace(':', '')}
 
   print message
 

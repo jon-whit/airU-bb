@@ -23,9 +23,9 @@ def fetch_data(excludeNonPollutants):
                                           AirMeasurement.type != 'Altitude',
                                           AirMeasurement.type != 'Pressure',
                                           AirMeasurement.type != 'Humidity',
-                                          AirMeasurement.type != 'PM1.0')
+                                          AirMeasurement.type != 'PM1.0').limit(10000)
 
-  return AirMeasurement().select().where(~(AirMeasurement.uploaded))
+  return AirMeasurement().select().where(~(AirMeasurement.uploaded)).limit(10000)
 
 def encode_data(metrics):
   """
@@ -51,7 +51,7 @@ def encode_data(metrics):
   for m in metrics:
     msg.append({
       "Time": str(m.date_added),
-      "Station": { "Id": get_mac('eth0') },
+      "Station": { "Id": get_mac('eth0').replace(':', '') },
       "Parameter": { "Name": m.type, "Unit": m.unit },
       "Location": { "lat": m.latitude, "lng": m.longitude },
       "Value": m.value

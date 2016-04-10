@@ -24,7 +24,7 @@ class AirMeasurement(BaseModel):
 
     """
 
-    type = CharField(choices=['CO', 'CO2', 'O3', 'PM1.0', 'PM2.5', 'PM10.0', 'NO2' 'Humidity', 'Temperature', 'Pressure', 'Altitude'])
+    type = CharField(choices=['CO', 'CO2', 'O3', 'PM1.0', 'PM2.5', 'PM10', 'NO2' 'Humidity', 'Temperature', 'Pressure', 'Altitude'])
     value = FloatField()
     unit = CharField()
     latitude = DoubleField()

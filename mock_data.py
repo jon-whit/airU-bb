@@ -43,5 +43,5 @@ if __name__ == '__main__':
     measurement.save()
     measurement = AirMeasurement(type='PM2.5', value=pm25, unit='UG/M3', latitude=lat, longitude=lon)
     measurement.save()
-    measurement = AirMeasurement(type='PM10.0', value=pm10, unit='UG/M3', latitude=lat, longitude=lon)
+    measurement = AirMeasurement(type='PM10', value=pm10, unit='UG/M3', latitude=lat, longitude=lon)
     measurement.save()

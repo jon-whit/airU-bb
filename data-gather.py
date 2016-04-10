@@ -54,7 +54,7 @@ if __name__ == '__main__':
         (pm1, pm25, pm10) = station.get_pm()
         rootLogger.info('PM1.0:            {0:0.1f} ug/m3'.format(pm1))
         rootLogger.info('PM2.5:            {0:0.1f} ug/m3'.format(pm25))
-        rootLogger.info('PM10.0:            {0:0.1f} ug/m3'.format(pm10))
+        rootLogger.info('PM10:            {0:0.1f} ug/m3'.format(pm10))
     rootLogger.info('Done Capturing Measurements.')
 
     # Save the captured measurements to the database
@@ -71,7 +71,7 @@ if __name__ == '__main__':
     measurement.save()
     measurement = AirMeasurement(type='PM2.5', value=pm25, unit='UG/M3', latitude=lat, longitude=lon)
     measurement.save()
-    measurement = AirMeasurement(type='PM10.0', value=pm10, unit='UG/M3', latitude=lat, longitude=lon)
+    measurement = AirMeasurement(type='PM10', value=pm10, unit='UG/M3', latitude=lat, longitude=lon)
     measurement.save()
     rootLogger.info('Measurements Saved.\n')
 

@@ -47,14 +47,13 @@ if __name__ == '__main__':
         rootLogger.info('Pressure:         {0:0.1f} Pa'.format(pressure))
         altitude = station.get_altitude()
         rootLogger.info('Altitude:         {0:0.1f} m'.format(altitude))
-        #lon, lat = station.get_location()
-        lon, lat = (41.2, 141.1)
+        lon, lat = station.get_location()
         rootLogger.info('Latitude:         {0:0.1f} deg'.format(lat))
         rootLogger.info('Longitude:        {0:0.1f} deg'.format(lon))
         (pm1, pm25, pm10) = station.get_pm()
         rootLogger.info('PM1.0:            {0:0.1f} ug/m3'.format(pm1))
         rootLogger.info('PM2.5:            {0:0.1f} ug/m3'.format(pm25))
-        rootLogger.info('PM10:            {0:0.1f} ug/m3'.format(pm10))
+        rootLogger.info('PM10:             {0:0.1f} ug/m3'.format(pm10))
     rootLogger.info('Done Capturing Measurements.')
 
     # Save the captured measurements to the database

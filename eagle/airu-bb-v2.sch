@@ -4631,6 +4631,7 @@ This is the "EZ" version, which has limited top masking for improved ease of ass
 <wire x1="152.4" y1="5.08" x2="101.6" y2="5.08" width="0.1524" layer="98" style="longdash"/>
 <text x="101.6" y="36.83" size="1.778" layer="91" font="vector">Operation Mode Switch</text>
 <wire x1="101.6" y1="35.56" x2="101.6" y2="5.08" width="0.1524" layer="98" style="longdash"/>
+<text x="104.14" y="7.62" size="0.8128" layer="91" font="vector">Field Mode (1) / Lab Mode (0)</text>
 </plain>
 <instances>
 <instance part="U1" gate="G$1" x="241.3" y="185.42" smashed="yes">

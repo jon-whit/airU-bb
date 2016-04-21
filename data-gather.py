@@ -1,7 +1,22 @@
-import argparse
+"""
+data-gather.py
+
+Author: Jonathan Whitaker
+Email: jon.b.whitaker@gmail.com
+Date: April 21, 2016
+
+data-gather.py is an integral part of the AirU toolchain, serving as the script
+which collects the datum from the various sensors onboard an AirU station. This 
+script is designed to run using a Cron. It was designed to write the data to an
+internal database if the station is set to run in Field Mode, or it will write 
+the data to a CSV file named by the current time and date if the station is in 
+Lab Mode.
+"""
 import logging
 import datetime
 import sys
+import time
+import Adafruit_BBIO.GPIO as GPIO
 from lib.airu.airstation import AirStation
 from lib.airu.dbmodels import *
 
@@ -10,33 +25,17 @@ rootLogger = logging.getLogger()
 rootLogger.setLevel(logging.INFO)
 
 if __name__ == '__main__':
-    """
-    """
-
-    # Create the command-line interface for this application
-    parser = argparse.ArgumentParser(description='The airU main application.')
-    parser.add_argument('-c', '--config', default='.', help='A directory containing the app configurations.')
-    parser.add_argument('-l', '--log', help='The path where logs should be written to. (defaults to the current directory)')
-
-    args = parser.parse_args()
-
+    
     # Setup logging
     logFormatter = logging.Formatter('%(asctime)s %(name)-12s %(levelname)-8s %(message)s')
-    if args.log:
-        filename = "{0}/{1}.log".format(args.log, datetime.datetime.now().strftime("%m-%d-%Y"))
-    else:
-        filename = "{0}.log".format(datetime.datetime.now().strftime("%m-%d-%Y"))
-    fileHandler = logging.FileHandler(filename)
+    logfilename = "/var/tmp/{0}.log".format(time.strftime("%m-%d-%Y"))
+    fileHandler = logging.FileHandler(logfilename)
     fileHandler.setFormatter(logFormatter)
     rootLogger.addHandler(fileHandler)
-
-    # Create the internal database for this station
-    rootLogger.info('Setting Up Internal Database...')
-    db.init('/root/air-metrics.db')
-    db.connect()
-    db.create_tables([AirMeasurement], True)
-    rootLogger.info('Database Setup Complete.')
-
+    
+    # Setup the GPIO input for the mode switch
+    GPIO.setup("P8_5", GPIO.IN)
+    
     rootLogger.info('Capturing Measurements from the Onboard Sensors...')
     with AirStation() as station:
         temp = station.get_temp()
@@ -47,8 +46,7 @@ if __name__ == '__main__':
         rootLogger.info('Pressure:         {0:0.1f} Pa'.format(pressure))
         altitude = station.get_altitude()
         rootLogger.info('Altitude:         {0:0.1f} m'.format(altitude))
-        #lon, lat = station.get_location()
-        lon, lat = (41.2, 141.1)
+        lon, lat = station.get_location()
         rootLogger.info('Latitude:         {0:0.1f} deg'.format(lat))
         rootLogger.info('Longitude:        {0:0.1f} deg'.format(lon))
         (pm1, pm25, pm10) = station.get_pm()
@@ -56,22 +54,45 @@ if __name__ == '__main__':
         rootLogger.info('PM2.5:            {0:0.1f} ug/m3'.format(pm25))
         rootLogger.info('PM10.0:            {0:0.1f} ug/m3'.format(pm10))
     rootLogger.info('Done Capturing Measurements.')
-
-    # Save the captured measurements to the database
-    rootLogger.info('Saving Captured Measurements to the Database...')
-    measurement = AirMeasurement(type='Temperature', value=temp, unit='C', latitude=lat, longitude=lon)
-    measurement.save()
-    measurement = AirMeasurement(type='Humidity', value=humidity, unit='%', latitude=lat, longitude=lon)
-    measurement.save()
-    measurement = AirMeasurement(type='Pressure', value=pressure, unit='Pascal', latitude=lat, longitude=lon)
-    measurement.save()
-    measurement = AirMeasurement(type='Altitude', value=altitude, unit='m', latitude=lat, longitude=lon)
-    measurement.save()
-    measurement = AirMeasurement(type='PM1.0', value=pm1, unit='ug/m3', latitude=lat, longitude=lon)
-    measurement.save()
-    measurement = AirMeasurement(type='PM2.5', value=pm25, unit='ug/m3', latitude=lat, longitude=lon)
-    measurement.save()
-    measurement = AirMeasurement(type='PM10.0', value=pm10, unit='ug/m3', latitude=lat, longitude=lon)
-    measurement.save()
-    rootLogger.info('Measurements Saved.\n')
-
+    
+    """
+    Check the operation mode. If the station is in field mode, write the measurements 
+    to the internal database. Otherwise, write the measurements to a CSV file named by 
+    the current date and time.
+    """ 
+    if GPIO.input("P8_5", GPIO.IN):
+        rootLogger.info('Setting Up Internal Database...')
+        db.init('/root/air-metrics.db')
+        db.connect()
+        db.create_tables([AirMeasurement], True)
+        rootLogger.info('Database Setup Complete.')
+        
+        # Save the captured measurements to the database
+        rootLogger.info('Saving Captured Measurements to the Database...')
+        measurement = AirMeasurement(type='Temperature', value=temp, unit='C', latitude=lat, longitude=lon)
+        measurement.save()
+        measurement = AirMeasurement(type='Humidity', value=humidity, unit='%', latitude=lat, longitude=lon)
+        measurement.save()
+        measurement = AirMeasurement(type='Pressure', value=pressure, unit='Pascal', latitude=lat, longitude=lon)
+        measurement.save()
+        measurement = AirMeasurement(type='Altitude', value=altitude, unit='m', latitude=lat, longitude=lon)
+        measurement.save()
+        measurement = AirMeasurement(type='PM1.0', value=pm1, unit='ug/m3', latitude=lat, longitude=lon)
+        measurement.save()
+        measurement = AirMeasurement(type='PM2.5', value=pm25, unit='ug/m3', latitude=lat, longitude=lon)
+        measurement.save()
+        measurement = AirMeasurement(type='PM10.0', value=pm10, unit='ug/m3', latitude=lat, longitude=lon)
+        measurement.save()
+        rootLogger.info('Measurements Saved.\n')
+    else:
+        # Otherwise append the measurement to a file with the current date and time
+        
+        outputfile = "/{0}.csv".format(time.strftime("%m-%d-%Y-%H-%M-%S"))
+        rootLogger.info("Opening CSV File '{0}' for Writing...".format(outputfile))
+        fh = open(outputfile, 'a')
+        
+        datastr = "{0},{1},{2},{3},{4},{5},{6},{7},{8}\n".format(temp, humidity, pressure, altitude, lat, lon, pm1, pm25, pm10)
+        rootLogger.info("Writing '{0}' to File...".format(datastr))
+        fh.write(datastr)
+        rootLogger.info("'{0}' Successfully Written.".format(datastr))
+        

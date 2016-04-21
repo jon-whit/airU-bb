@@ -1,3 +1,15 @@
+"""
+register-station.py
+
+Author: Jonathan Whitaker
+Email: jon.b.whitaker@gmail.com
+Date: April 21, 2016
+
+register-station.py is a script which serves to send a registration call to the
+AirU registration endpoint. This script is designed to run at station bootup. If
+the station is already registered, the post conditions of this script will have
+no effect.
+"""
 from lib.airu.macaddress import MacAddress
 import requests
 import pprint

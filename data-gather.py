@@ -6,7 +6,7 @@ Email: jon.b.whitaker@gmail.com
 Date: April 21, 2016
 
 data-gather.py is an integral part of the AirU toolchain, serving as the script
-which collects the datum from the various sensors onboard an AirU station. This 
+which collects the data from the various sensors onboard an AirU station. This 
 script is designed to run using a Cron. It was designed to write the data to an
 internal database if the station is set to run in Field Mode, or it will write 
 the data to a CSV file named by the current time and date if the station is in 

@@ -23,9 +23,9 @@ def fetch_data(excludeNonPollutants):
                                           AirMeasurement.type != 'Altitude',
                                           AirMeasurement.type != 'Pressure',
                                           AirMeasurement.type != 'Humidity',
-                                          AirMeasurement.type != 'PM1.0').limit(10000)
+                                          AirMeasurement.type != 'PM1.0').limit(500)
 
-  return AirMeasurement().select().where(~(AirMeasurement.uploaded)).limit(10000)
+  return AirMeasurement().select().where(~(AirMeasurement.uploaded)).limit(500)
 
 def encode_data(metrics):
   """

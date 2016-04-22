@@ -6,7 +6,7 @@ Email: jon.b.whitaker@gmail.com
 Date: April 21, 2016
 
 data-gather.py is an integral part of the AirU toolchain, serving as the script
-which collects the datum from the various sensors onboard an AirU station. This 
+which collects the data from the various sensors onboard an AirU station. This 
 script is designed to run using a Cron. It was designed to write the data to an
 internal database if the station is set to run in Field Mode, or it will write 
 the data to a CSV file named by the current time and date if the station is in 
@@ -20,7 +20,7 @@ import Adafruit_BBIO.GPIO as GPIO
 from lib.airu.airstation import AirStation
 from lib.airu.dbmodels import *
 
-# Setup the Logging interface for this app
+# Setup the Logging interface for this script
 rootLogger = logging.getLogger()
 rootLogger.setLevel(logging.INFO)
 
@@ -33,9 +33,10 @@ if __name__ == '__main__':
     fileHandler.setFormatter(logFormatter)
     rootLogger.addHandler(fileHandler)
     
-    # Setup the GPIO input for the mode switch
+    # Setup the GPIO input pin for the mode switch
     GPIO.setup("P8_5", GPIO.IN)
     
+    # Sample the sensors
     rootLogger.info('Capturing Measurements from the Onboard Sensors...')
     with AirStation() as station:
         temp = station.get_temp()
@@ -86,7 +87,6 @@ if __name__ == '__main__':
         rootLogger.info('Measurements Saved.\n')
     else:
         # Otherwise append the measurement to a file with the current date and time
-        
         outputfile = "/{0}.csv".format(time.strftime("%m-%d-%Y-%H-%M-%S"))
         rootLogger.info("Opening CSV File '{0}' for Writing...".format(outputfile))
         fh = open(outputfile, 'a')

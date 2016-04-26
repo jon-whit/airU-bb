@@ -17,5 +17,6 @@ if __name__ == '__main__':
     # TODO: Add logging
     
     # Get all samples that have been uploaded and execute a delete query
-    query = AirMeasurement.delete().where(AirMeasurement.uploaded == True)
-    query.execute()
+    db.init('/root/air-metrics.db')
+    db.connect()
+    AirMeasurement.delete().where(AirMeasurement.uploaded == True).execute()

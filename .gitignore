@@ -1,3 +1,7 @@
+### Excel ###
+*.xls
+*.xlsx
+
 ### SublimeText ###
 # cache files for sublime text
 *.tmlanguage.cache

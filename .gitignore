@@ -1,5 +1,8 @@
-### Excel ###
-*.xls
+
+### Test Database ###
+*.db
+
+### Excel Files ###
 *.xlsx
 
 ### SublimeText ###

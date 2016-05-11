@@ -10,13 +10,12 @@ AirU registration endpoint. This script is designed to run at station bootup. If
 the station is already registered, the post conditions of this script will have
 no effect.
 """
-from lib.airu.macaddress import MacAddress
 import requests
 from lib.airu.utils import get_mac
 
 if __name__ == '__main__':
   """
-  Uploads the MACAddress to the server for station registration.
+  Uploads the MAC address to the server for station registration.
   """
 
   url     = 'http://dev.air.eng.utah.edu/api/stations/ping'

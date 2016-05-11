@@ -34,7 +34,7 @@ if __name__ == '__main__':
     rootLogger.addHandler(fileHandler)
     
     # Setup the GPIO input pin for the mode switch
-    GPIO.setup("P8_5", GPIO.IN)
+    GPIO.setup("P8_7", GPIO.IN)
     
     # Sample the sensors
     rootLogger.info('Capturing Measurements from the Onboard Sensors...')
@@ -61,7 +61,7 @@ if __name__ == '__main__':
     to the internal database. Otherwise, write the measurements to a CSV file named by 
     the current date and time.
     """ 
-    if GPIO.input("P8_5", GPIO.IN):
+    if GPIO.input("P8_7"):
         rootLogger.info('Setting Up Internal Database...')
         db.init('/root/air-metrics.db')
         db.connect()

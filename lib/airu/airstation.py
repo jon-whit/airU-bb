@@ -71,7 +71,7 @@ class AirStation:
 
         return self._id
 
-    @retry(RetryException, retries=5)
+    @retry(RetryException, retries=10)
     def get_location(self):
         """
         Gets the latitudinal and longitudinal coordinates of this AirStation as a tuple.

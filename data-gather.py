@@ -28,13 +28,13 @@ if __name__ == '__main__':
     
     # Setup logging
     logFormatter = logging.Formatter('%(asctime)s %(name)-12s %(levelname)-8s %(message)s')
-    logfilename = "/var/tmp/{0}.log".format(time.strftime("%m-%d-%Y"))
+    logfilename = "/var/log/{0}.log".format(time.strftime("%m-%d-%Y"))
     fileHandler = logging.FileHandler(logfilename)
     fileHandler.setFormatter(logFormatter)
     rootLogger.addHandler(fileHandler)
     
     # Setup the GPIO input pin for the mode switch
-    GPIO.setup("P8_5", GPIO.IN)
+    GPIO.setup("P8_7", GPIO.IN)
     
     # Sample the sensors
     rootLogger.info('Capturing Measurements from the Onboard Sensors...')
@@ -61,7 +61,8 @@ if __name__ == '__main__':
     to the internal database. Otherwise, write the measurements to a CSV file named by 
     the current date and time.
     """ 
-    if GPIO.input("P8_5", GPIO.IN):
+    if GPIO.input("P8_7"):
+        rootLogger.info('Station Set to Field Mode.')
         rootLogger.info('Setting Up Internal Database...')
         db.init('/root/air-metrics.db')
         db.connect()
@@ -86,13 +87,14 @@ if __name__ == '__main__':
         measurement.save()
         rootLogger.info('Measurements Saved.\n')
     else:
+        rootLogger.info('Station Set to Lab Mode.')
         # Otherwise append the measurement to a file with the current date and time
-        outputfile = "/{0}.csv".format(time.strftime("%m-%d-%Y-%H-%M-%S"))
+        outputfile = "/var/tmp/{0}.csv".format(time.strftime("%m-%d-%Y"))
         rootLogger.info("Opening CSV File '{0}' for Writing...".format(outputfile))
         fh = open(outputfile, 'a')
         
-        datastr = "{0},{1},{2},{3},{4},{5},{6},{7},{8}\n".format(temp, humidity, pressure, altitude, lat, lon, pm1, pm25, pm10)
-        rootLogger.info("Writing '{0}' to File...".format(datastr))
+        rootLogger.info("Writing Sample to File...")
+        datastr = "{0},{1},{2},{3},{4},{5},{6},{7},{8}\n".format(temp, humidity, pressure, altitude, pm1, pm25, pm10, lat, lon)
         fh.write(datastr)
-        rootLogger.info("'{0}' Successfully Written.".format(datastr))
+        rootLogger.info("Sample Successfully Written.\n")
         

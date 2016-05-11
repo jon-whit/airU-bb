@@ -9,7 +9,8 @@ from exception import InitException
 from utils import retry
 
 # Define constants specific to an AirStation (pin numbers, etc..)
-DHT22_PIN = 'P8_11'
+DHT22_PIN   = 'P8_11'
+MODE_SWITCH = 'P8_7' 
 
 class AirStation:
     """
@@ -42,16 +43,14 @@ class AirStation:
         """
         self._id = utils.get_mac('eth0')
         self._bmp = BMP085.BMP085()
-        #self._gpsp = utils.GpsPoller()
-        #self._gpsp.start()  # start polling the GPS sensor
-        #self._gps = gps.gps("localhost", "2947")
-        #self._gps.stream(gps.WATCH_ENABLE | gps.WATCH_NEWSTYLE)
+        self._gpsp = utils.GpsPoller()
+        self._gpsp.start()  # start polling the GPS sensor
+        self._gps = gps.gps("localhost", "2947")
+        self._gps.stream(gps.WATCH_ENABLE | gps.WATCH_NEWSTYLE)
 
         # Wait a few seconds to ensure a GPS fix
-        #time.sleep(5)
-        #location = self.get_location()
-        #self._lon = location[0]
-        #self._lat = location[1]
+        time.sleep(10)
+        (self._lon, self._lat) = self.get_location()
  
         # Open a connection with the PMS3003 sensor
         self._pm = serial.Serial(port="/dev/ttyO1", baudrate=9600, rtscts=True, dsrdtr=True)
@@ -72,7 +71,7 @@ class AirStation:
 
         return self._id
 
-    @retry(RetryException, retries=5)
+    @retry(RetryException, retries=10)
     def get_location(self):
         """
         Gets the latitudinal and longitudinal coordinates of this AirStation as a tuple.
@@ -102,7 +101,7 @@ class AirStation:
         :raises: exception.RetryException if no reading was obtained in the retry period.
         """
 
-        return self._bmp.read_temperature()
+        return Adafruit_DHT.read_retry(Adafruit_DHT.DHT22, DHT22_PIN)[1]
 
     @retry(RetryException, retries=5)
     def get_pressure(self):
@@ -305,8 +304,8 @@ class AirStation:
         """
 
         # Stop the GpsPoller in the extra thread
-        #self._gpsp.running = False
-        #self._gpsp.join()
+        self._gpsp.running = False
+        self._gpsp.join()
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         """

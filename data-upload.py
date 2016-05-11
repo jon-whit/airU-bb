@@ -1,15 +1,14 @@
-import json
-import requests
-from lib.airu.dbmodels import *
-from lib.airu.utils import get_mac
+"""
+data-upload.py
 
-def prepare_db():
-  """
-  Establishes a connection with the database.
-  """
-  # remove '/root/' when testing with mock_data
-  db.init('/root/air-metrics.db')
-  db.connect()
+Author: Jonathan Whitaker
+Email: jon.b.whitaker@gmail.com
+Date: April 21, 2016
+
+data-upload.py is an integral part of the AirU toolchain, serving as the script
+which uploads the collected data from the AirU station. This script is designed 
+to run using a Cron.
+"""
 
 def fetch_data(excludeNonPollutants):
   """

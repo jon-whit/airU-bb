@@ -1,0 +1,9 @@
+[Unit]
+Description=Station Registration
+
+[Service]
+Type=simple
+ExecStart=/usr/local/bin/register-station.sh
+
+[Install]
+WantedBy=multi-user.target

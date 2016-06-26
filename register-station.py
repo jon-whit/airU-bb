@@ -12,6 +12,7 @@ the station is already registered, the post conditions of this script will have
 no effect.
 """
 import requests
+import json
 from lib.airu.utils import get_mac
 
 if __name__ == '__main__':

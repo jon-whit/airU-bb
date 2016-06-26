@@ -1,3 +1,4 @@
+#!/usr/bin/python
 """
 data-clean.py
 

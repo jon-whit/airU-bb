@@ -16,7 +16,11 @@ import logging
 import datetime
 import sys
 import time
+import serial
+import Adafruit_BMP.BMP085 as BMP085
 import Adafruit_BBIO.GPIO as GPIO
+from lib.airu import utils
+from lib.airu import airstation
 from lib.airu.airstation import AirStation
 from lib.airu.dbmodels import *
 
@@ -34,11 +38,18 @@ if __name__ == '__main__':
     rootLogger.addHandler(fileHandler)
     
     # Setup the GPIO input pin for the mode switch
-    GPIO.setup("P8_7", GPIO.IN)
+    GPIO.setup(airstation.MODE_SWITCH, GPIO.IN)
     
+    # If the mode switch is "high", the station is in field mode
+    if GPIO.input(airstation.MODE_SWITCH):
+        mode = airstation.FIELD_MODE
+    else:
+        mode = airstation.LAB_MODE
+
     # Sample the sensors
     rootLogger.info('Capturing Measurements from the Onboard Sensors...')
-    with AirStation() as station:
+    pm_ser = serial.Serial(port="/dev/ttyO1", baudrate=9600, rtscts=True, dsrdtr=True)
+    with AirStation(BMP085.BMP085(), utils.GpsPoller(), pm_ser, mode) as station:
         temp = station.get_temp()
         rootLogger.info('Temperature:      {0:0.1f} C'.format(temp))
         humidity = station.get_humidity()
@@ -47,9 +58,12 @@ if __name__ == '__main__':
         rootLogger.info('Pressure:         {0:0.1f} Pa'.format(pressure))
         altitude = station.get_altitude()
         rootLogger.info('Altitude:         {0:0.1f} m'.format(altitude))
-        lon, lat = station.get_location()
-        rootLogger.info('Latitude:         {0:0.1f} deg'.format(lat))
-        rootLogger.info('Longitude:        {0:0.1f} deg'.format(lon))
+        
+        if mode == airstation.FIELD_MODE:
+            lon, lat = station.get_location()
+            rootLogger.info('Latitude:         {0:0.1f} deg'.format(lat))
+            rootLogger.info('Longitude:        {0:0.1f} deg'.format(lon))
+
         (pm1, pm25, pm10) = station.get_pm()
         rootLogger.info('PM1.0:            {0:0.1f} ug/m3'.format(pm1))
         rootLogger.info('PM2.5:            {0:0.1f} ug/m3'.format(pm25))
@@ -61,7 +75,7 @@ if __name__ == '__main__':
     to the internal database. Otherwise, write the measurements to a CSV file named by 
     the current date and time.
     """ 
-    if GPIO.input("P8_7"):
+    if GPIO.input(airstation.MODE_SWITCH):
         rootLogger.info('Station Set to Field Mode.')
         rootLogger.info('Setting Up Internal Database...')
         db.init('/root/air-metrics.db')
@@ -89,12 +103,12 @@ if __name__ == '__main__':
     else:
         rootLogger.info('Station Set to Lab Mode.')
         # Otherwise append the measurement to a file with the current date and time
-        outputfile = "/var/tmp/{0}.csv".format(time.strftime("%m-%d-%Y"))
+        outputfile = "/media/sdcard/{0}.csv".format(time.strftime("%m-%d-%Y"))
         rootLogger.info("Opening CSV File '{0}' for Writing...".format(outputfile))
         fh = open(outputfile, 'a')
         
         rootLogger.info("Writing Sample to File...")
-        datastr = "{0},{1},{2},{3},{4},{5},{6},{7},{8}\n".format(temp, humidity, pressure, altitude, pm1, pm25, pm10, lat, lon)
+        datastr = "{0},{1},{2},{3},{4},{5},{6}\n".format(temp, humidity, pressure, altitude, pm1, pm25, pm10)
         fh.write(datastr)
         rootLogger.info("Sample Successfully Written.\n")
         

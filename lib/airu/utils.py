@@ -1,5 +1,6 @@
 import threading
-from gps import *
+import time
+import gps
 from functools import wraps
 
 class GpsPoller(threading.Thread):
@@ -14,7 +15,8 @@ class GpsPoller(threading.Thread):
         """
 
         threading.Thread.__init__(self)
-        self.session = gps(mode=WATCH_ENABLE)
+        self.gpsd = gps.gps("localhost", "2947")
+        self.gpsd.stream(gps.WATCH_ENABLE | gps.WATCH_NEWSTYLE)
         self.current_value = None
         self.running = True
 
@@ -33,7 +35,12 @@ class GpsPoller(threading.Thread):
         field is set to False.
         """
         while self.running:
-            self.current_value = self.session.next()
+
+            report = self.gpsd.next()
+            if (self.gpsd.fix.mode != 1): # 1 = NO_FIX, 2 = 2D, 3 = 3D
+                self.current_value = report 
+            
+            time.sleep(1) # Wait 1 second between updates
 
 def retry(e, retries=4, delay=1, logger=None):
     """

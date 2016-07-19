@@ -1,9 +1,6 @@
 import time
-import Adafruit_BMP.BMP085 as BMP085
 import Adafruit_DHT
 import utils
-import gps
-import serial
 from exception import RetryException
 from exception import InitException
 from utils import retry
@@ -11,6 +8,8 @@ from utils import retry
 # Define constants specific to an AirStation (pin numbers, etc..)
 DHT22_PIN   = 'P8_11'
 MODE_SWITCH = 'P8_7' 
+LAB_MODE    = 0
+FIELD_MODE  = 1
 
 class AirStation:
     """
@@ -20,44 +19,27 @@ class AirStation:
     connected to the station.
     """
 
-    def __init__(self):
+    def __init__(self, bmp, gpsp, pm, mode = FIELD_MODE):
         """
         Constructs an AirStation object.
         """
 
-        if not self._init_station():
-            raise InitException("Could not initialize the AirStation!")
+        self._id = utils.get_mac('eth0')
+        self._mode = mode
+        self._bmp = bmp
+        self._gpsp = gpsp
+
+        # Only field mode requires gelocation information
+        if mode == FIELD_MODE:
+          self._gpsp.start() # Start the GPS poller
+        
+        # Open a connection with the PMS3003 sensor
+        self._pm = pm
+        self._pm.close()
+        self._pm.open()
 
     def __enter__(self):
         return self
-
-    def _init_station(self):
-        """
-        Attempts to initialize this AirStation object.
-
-        This method is used to initialize the various fields and sensors of an AirStation object.
-        If the object cannot be initialized then this method returns False, otherwise it returns
-        True.
-
-        :return: True if the AirStation could be initialized. False otherwise.
-        """
-        self._id = utils.get_mac('eth0')
-        self._bmp = BMP085.BMP085()
-        self._gpsp = utils.GpsPoller()
-        self._gpsp.start()  # start polling the GPS sensor
-        self._gps = gps.gps("localhost", "2947")
-        self._gps.stream(gps.WATCH_ENABLE | gps.WATCH_NEWSTYLE)
-
-        # Wait a few seconds to ensure a GPS fix
-        time.sleep(10)
-        (self._lon, self._lat) = self.get_location()
- 
-        # Open a connection with the PMS3003 sensor
-        self._pm = serial.Serial(port="/dev/ttyO1", baudrate=9600, rtscts=True, dsrdtr=True)
-        self._pm.close()
-        self._pm.open()
-        
-        return True
 
     def get_id(self):
         """
@@ -79,13 +61,12 @@ class AirStation:
         :return: A tuple containing the latitude and longitude, respectively.
         """
 
-        #gps_data = self._gpsp.get_gps_data()
-        gps_data = self._gps.next()
+        gps_data = self._gpsp.get_gps_data()
         
-        if 'lon' not in gps_data or 'lat' not in gps_data:
-            return None
-        else:
+        if gps_data is not None:
             return gps_data['lon'], gps_data['lat']
+        else:
+            return None
 
     @retry(RetryException, retries=5)
     def get_temp(self):
@@ -303,9 +284,10 @@ class AirStation:
         object.
         """
 
-        # Stop the GpsPoller in the extra thread
-        self._gpsp.running = False
-        self._gpsp.join()
+        # Stop the GpsPoller in the extra thread if it is running
+        if self._gpsp.running and self._mode == FIELD_MODE:
+          self._gpsp.running = False
+          self._gpsp.join()
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         """

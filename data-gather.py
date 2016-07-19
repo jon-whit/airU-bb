@@ -48,7 +48,7 @@ if __name__ == '__main__':
 
     # Sample the sensors
     rootLogger.info('Capturing Measurements from the Onboard Sensors...')
-    pm_ser = serial.Serial(port="/dev/ttyO1", baudrate=9600, rtscts=True, dsrdtr=True)
+    pm_ser = serial.Serial(port=airstation.PM_PORT, baudrate=9600, rtscts=True, dsrdtr=True)
     with AirStation(BMP085.BMP085(), utils.GpsPoller(), pm_ser, mode) as station:
         temp = station.get_temp()
         rootLogger.info('Temperature:      {0:0.1f} C'.format(temp))
@@ -75,7 +75,7 @@ if __name__ == '__main__':
     to the internal database. Otherwise, write the measurements to a CSV file named by 
     the current date and time.
     """ 
-    if GPIO.input(airstation.MODE_SWITCH):
+    if mode == airstation.FIELD_MODE:
         rootLogger.info('Station Set to Field Mode.')
         rootLogger.info('Setting Up Internal Database...')
         db.init('/root/air-metrics.db')

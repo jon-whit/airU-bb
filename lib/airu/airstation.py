@@ -7,6 +7,7 @@ from utils import retry
 
 # Define constants specific to an AirStation (pin numbers, etc..)
 DHT22_PIN   = 'P8_11'
+PM_PORT      = '/dev/tty01'
 MODE_SWITCH = 'P8_7' 
 LAB_MODE    = 0
 FIELD_MODE  = 1

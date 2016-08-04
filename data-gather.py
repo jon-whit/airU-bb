@@ -113,7 +113,7 @@ if __name__ == '__main__':
         fh = open(outputfile, 'a')
         
         rootLogger.info("Writing Sample to File...")
-        datastr = "{0},{1},{2},{3},{4},{5},{6}\n".format(temp, humidity, pressure, altitude, pm1, pm25, pm10)
+        datastr = "{0},{1},{2},{3},{4},{5},{6},{7},{8}\n".format(temp, humidity, pressure, altitude, pm1, pm25, pm10, co, no2)
         fh.write(datastr)
         rootLogger.info("Sample Successfully Written.\n")
         

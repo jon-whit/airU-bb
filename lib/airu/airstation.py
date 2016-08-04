@@ -10,8 +10,8 @@ from utils import retry
 DHT22_PIN   = 'P8_11'
 PM_PORT      = '/dev/ttyO1'
 MODE_SWITCH = 'P8_7' 
-CO_PIN      = 'AIN0'
-NO2_PIN     = 'AIN1'
+NO2_PIN     = 'AIN0'
+CO_PIN      = 'AIN1'
 LAB_MODE    = 0
 FIELD_MODE  = 1
 

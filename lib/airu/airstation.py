@@ -1,6 +1,7 @@
 import time
 import Adafruit_DHT
 import utils
+import Adafruit_BBIO.ADC as ADC
 from exception import RetryException
 from exception import InitException
 from utils import retry
@@ -9,6 +10,8 @@ from utils import retry
 DHT22_PIN   = 'P8_11'
 PM_PORT      = '/dev/ttyO1'
 MODE_SWITCH = 'P8_7' 
+CO_PIN      = 'AIN0'
+NO2_PIN     = 'AIN1'
 LAB_MODE    = 0
 FIELD_MODE  = 1
 
@@ -38,6 +41,9 @@ class AirStation:
         self._pm = pm
         self._pm.close()
         self._pm.open()
+
+        # Setup the ADC peripheral
+        ADC.setup()
 
     def __enter__(self):
         return self
@@ -211,22 +217,27 @@ class AirStation:
 
         return None
 
-    @retry(RetryException, retries=5)
+    @retry(RetryException, retries=3)
     def get_co(self):
         """
-        Gets the current CO reading as a concentration in parts per million (ppm) as reported by the (fill
-        this in here).
-
-        For more information on how this reading is obtained, please see the
-        official datasheet below:
-
-        todo: Get datasheet for the specific CO sensor we are using
-
-        :return: A float representing the concentration of CO (ppm).
+        Gets the current voltage reading from the analog CO sensor. 
+        
+        :return: A voltage representing the current concentration of CO (ppm).
         :raises: exception.RetryException if no reading was obtained in the retry period.
         """
 
-        return None
+        return ADC.read(CO_PIN) * 1.8
+
+    @retry(RetryException, retries=3)
+    def get_no2(self):
+        """
+        Gets the current voltage reading from the analog NO2 sensor.
+
+        :return: A voltage representing the current concentration of NO2. 
+        :raises: exception.RetryException if no reading was obtained in the retry period.
+        """
+
+        return ADC.read(NO2_PIN) * 1.8
 
     @retry(RetryException, retries=5)
     def get_o3(self):

@@ -68,6 +68,11 @@ if __name__ == '__main__':
         rootLogger.info('PM1.0:            {0:0.1f} ug/m3'.format(pm1))
         rootLogger.info('PM2.5:            {0:0.1f} ug/m3'.format(pm25))
         rootLogger.info('PM10:             {0:0.1f} ug/m3'.format(pm10))
+
+        co  = station.get_co()
+        rootLogger.info('CO:               {0:0.1f} volts'.format(co))
+        no2 = station.get_no2()
+        rootLogger.info('NO2:              {0:0.1f} volts'.format(no2))
     rootLogger.info('Done Capturing Measurements.')
     
     """
